@@ -2,10 +2,25 @@ require 'ezcrypto'
 require 'time'
 
 class MultiPass
-  class Invalid      < StandardError; end
-  class ExpiredError < Invalid;       end
-  class JSONError    < Invalid;       end
-  class DecryptError < Invalid;       end
+  class Invalid < StandardError
+    @@message = "The MultiPass token is invalid."
+
+    def message
+      @@message
+    end
+
+    alias to_s message
+  end
+
+  class ExpiredError < Invalid
+    @@message = "The MultiPass token has expired."
+  end
+  class JSONError < Invalid
+    @@message = "The decrypted MultiPass token is not valid JSON."
+  end
+  class DecryptError < Invalid
+    @@message = "The MultiPass token was not able to be decrypted."
+  end
 
   def self.encode(site_key, api_key, options = {})
     new(site_key, api_key).encode(options)
