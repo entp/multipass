@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{multipass}
-  s.version = "1.0.0"
+  s.version = "1.0.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["rick"]
@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--inline-source", "--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.3}
-  s.summary = 'Bare bones implementation of encoding and decoding MultiPass values for SSO.'
+  s.summary = %q{Bare bones implementation of encoding and decoding MultiPass values for SSO.}
 
   if s.respond_to? :specification_version then
     current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
