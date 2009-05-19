@@ -5,7 +5,7 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "multipass"
-    gem.summary = %Q{TODO}
+    gem.summary = 'Bare bones implementation of encoding and decoding MultiPass values for SSO.'
     gem.email = "technoweenie@gmail.com"
     gem.homepage = "http://github.com/entp/multipass"
     gem.authors = ["rick"]
