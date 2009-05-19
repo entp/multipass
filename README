@@ -1,0 +1,12 @@
+MultiPass
+=========
+
+Bare bones implementation of encoding and decoding MultiPass values for SSO.
+
+MultiPasses are json hashes encrypted with strong AES encryption.  They are typically
+passed as cookie values, URL params, or HTTP header values, depending on how
+the individual service chooses to implement it.  
+
+The idea is that if a site wants to automatically create a local user based
+on the login credentials of another site, it will look for a MultiPass.  This 
+MultiPass can contain the user's email address, name, etc.  
