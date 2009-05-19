@@ -1,5 +1,5 @@
-require 'active_support'
 require 'ezcrypto'
+require 'time'
 
 class MultiPass
   class Invalid      < StandardError; end
@@ -24,36 +24,71 @@ class MultiPass
   # Encrypts the given hash into a multipass string.
   def encode(options = {})
     options[:expires] = case options[:expires]
-      when Fixnum               then Time.at(options[:expires]).to_s(:db)
-      when Time, DateTime, Date then options[:expires].to_s(:db)
+      when Fixnum               then Time.at(options[:expires]).to_s
+      when Time, DateTime, Date then options[:expires].to_s
       else options[:expires].to_s
     end
-    @crypto_key.encrypt64(options.to_json)
+    escape_value @crypto_key.encrypt64(options.to_json)
   end
 
   # Decrypts the given multipass string and parses it as JSON.  Then, it checks
   # for a valid expiration date.
   def decode(data)
-    json = @crypto_key.decrypt64(data)
+    json = @crypto_key.decrypt64(unescape_value(data))
     
     if json.nil?
       raise MultiPass::DecryptError
     end
 
-    options = ActiveSupport::JSON.decode(json)
+    options = decode_json(json)
     
     if !options.is_a?(Hash)
       raise MultiPass::JSONError
     end
 
-    options.symbolize_keys!
+    options.keys.each do |key|
+      options[key.to_sym] = options.delete(key)
+    end
 
-    if options[:expires].blank? || Time.now.utc > Time.parse(options[:expires])
+    if options[:expires].nil? || Time.now.utc > Time.parse(options[:expires])
       raise MultiPass::ExpiredError
     end
 
     options
-  rescue ActiveSupport::JSON::ParseError
-    raise MultiPass::JSONError
+  end
+
+private
+  if Object.const_defined?(:ActiveSupport)
+    def decode_json(s)
+      ActiveSupport::JSON.decode(s)
+    rescue ActiveSupport::JSON::ParseError
+      raise MultiPass::JSONError
+    end
+  else
+    require 'json'
+    def decode_json(s)
+      JSON.parse(s)
+    rescue JSON::ParserError
+      raise MultiPass::JSONError
+    end
+  end
+
+  if Object.const_defined?(:Rack)
+    def escape_value(s)
+      Rack::Utils.escape(s)
+    end
+
+    def unescape_value(s)
+      Rack::Utils.unescape(s)
+    end
+  else
+    require 'cgi'
+    def escape_value(s)
+      CGI.escape(s)
+    end
+
+    def unescape_value(s)
+      CGI.unescape(s)
+    end
   end
 end

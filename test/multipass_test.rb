@@ -5,21 +5,21 @@ require 'multipass'
 
 class MultiPassTest < Test::Unit::TestCase
   def setup
-    @date   = 1234.seconds.from_now
+    @date   = Time.now + 1234
     @input  = {:expires => @date, :email => 'ricky@bobby.com'}
-    @output = @input.merge(:expires => @input[:expires].to_s(:db))
+    @output = @input.merge(:expires => @input[:expires].to_s)
     @key    = EzCrypto::Key.with_password('example', 'abc')
     @mp     = MultiPass.new('example', 'abc')
   end
 
   def test_encodes_multipass
     expected = @key.encrypt64(@output.to_json)
-    assert_equal expected, @mp.encode(@input)
+    assert_equal CGI.escape(expected), @mp.encode(@input)
   end
 
   def test_encodes_multipass_with_class_method
     expected = @key.encrypt64(@output.to_json)
-    assert_equal expected, MultiPass.encode('example', 'abc', @input)
+    assert_equal CGI.escape(expected), MultiPass.encode('example', 'abc', @input)
   end
 
   def test_decodes_multipass
@@ -40,15 +40,15 @@ class MultiPassTest < Test::Unit::TestCase
 
   def test_invalidates_bad_json
     assert_raises MultiPass::JSONError do
-      @mp.decode(@key.encrypt64("abc"))
+      @mp.decode(CGI.escape(@key.encrypt64("abc")))
     end
     assert_raises MultiPass::JSONError do
-      @mp.decode(@key.encrypt64("{a"))
+      @mp.decode(CGI.escape(@key.encrypt64("{a")))
     end
   end
 
   def test_invalidates_old_expiration
-    encrypted = @key.encrypt64(@input.merge(:expires => 1.second.ago).to_json)
+    encrypted = CGI.escape @key.encrypt64(@input.merge(:expires => (Time.now - 1)).to_json)
     assert_raises MultiPass::ExpiredError do
       @mp.decode(encrypted)
     end
