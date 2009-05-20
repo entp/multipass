@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{multipass}
-  s.version = "1.0.1"
+  s.version = "1.1.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["rick"]
-  s.date = %q{2009-05-19}
+  s.date = %q{2009-05-20}
   s.email = %q{technoweenie@gmail.com}
   s.extra_rdoc_files = ["README", "LICENSE"]
   s.files = ["VERSION.yml", "lib/multipass.rb", "test/multipass_test.rb", "README", "LICENSE"]
