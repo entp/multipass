@@ -70,6 +70,8 @@ class MultiPass
     end
 
     options
+  rescue OpenSSL::CipherError
+    raise MultiPass::DecryptError
   end
 
 private
