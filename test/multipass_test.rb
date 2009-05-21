@@ -14,12 +14,12 @@ class MultiPassTest < Test::Unit::TestCase
 
   def test_encodes_multipass
     expected = @key.encrypt64(@output.to_json)
-    assert_equal CGI.escape(expected), @mp.encode(@input)
+    assert_equal expected, @mp.encode(@input)
   end
 
   def test_encodes_multipass_with_class_method
     expected = @key.encrypt64(@output.to_json)
-    assert_equal CGI.escape(expected), MultiPass.encode('example', 'abc', @input)
+    assert_equal expected, MultiPass.encode('example', 'abc', @input)
   end
 
   def test_decodes_multipass
@@ -40,15 +40,15 @@ class MultiPassTest < Test::Unit::TestCase
 
   def test_invalidates_bad_json
     assert_raises MultiPass::JSONError do
-      @mp.decode(CGI.escape(@key.encrypt64("abc")))
+      @mp.decode(@key.encrypt64("abc"))
     end
     assert_raises MultiPass::JSONError do
-      @mp.decode(CGI.escape(@key.encrypt64("{a")))
+      @mp.decode(@key.encrypt64("{a"))
     end
   end
 
   def test_invalidates_old_expiration
-    encrypted = CGI.escape @key.encrypt64(@input.merge(:expires => (Time.now - 1)).to_json)
+    encrypted = @key.encrypt64(@input.merge(:expires => (Time.now - 1)).to_json)
     assert_raises MultiPass::ExpiredError do
       @mp.decode(encrypted)
     end
