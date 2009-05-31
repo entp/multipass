@@ -1,4 +1,3 @@
-require 'ezcrypto'
 require 'time'
 
 class MultiPass
@@ -33,6 +32,9 @@ class MultiPass
   def initialize(site_key, api_key)
     @site_key   = site_key
     @api_key    = api_key
+    if !Object.const_defined?(:EzCrypto)
+      require 'ezcrypto'
+    end
     @crypto_key = EzCrypto::Key.with_password(@site_key, @api_key)
   end
 
