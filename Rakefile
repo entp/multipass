@@ -9,6 +9,7 @@ begin
     gem.email = "technoweenie@gmail.com"
     gem.homepage = "http://github.com/entp/multipass"
     gem.authors = ["rick"]
+    gem.add_dependency 'ezcrypto'
 
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
