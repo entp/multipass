@@ -3,6 +3,7 @@ require 'rubygems'
 require 'test/unit'
 require 'ezcrypto'
 require 'multipass'
+#require 'active_support'
 
 class MultiPassTest < Test::Unit::TestCase
   def setup
@@ -14,12 +15,12 @@ class MultiPassTest < Test::Unit::TestCase
   end
 
   def test_encodes_multipass
-    expected = @key.encrypt64(@output.to_json)
+    expected = @key.encrypt64(@output.to_json).gsub(/\n/, '')
     assert_equal expected, @mp.encode(@input)
   end
 
   def test_encodes_multipass_with_class_method
-    expected = @key.encrypt64(@output.to_json)
+    expected = @key.encrypt64(@output.to_json).gsub(/\n/, '')
     assert_equal expected, MultiPass.encode('example', 'abc', @input)
   end
 

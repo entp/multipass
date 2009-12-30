@@ -45,13 +45,13 @@ class MultiPass
       when Time, DateTime, Date then options[:expires].to_s
       else options[:expires].to_s
     end
-    @crypto_key.encrypt64(options.to_json)
+    encode_64 @crypto_key.encrypt(options.to_json)
   end
 
   # Decrypts the given multipass string and parses it as JSON.  Then, it checks
   # for a valid expiration date.
   def decode(data)
-    json = @crypto_key.decrypt64(data)
+    json = @crypto_key.decrypt(decode_64(data))
     
     if json.nil?
       raise MultiPass::DecryptError
@@ -76,7 +76,22 @@ class MultiPass
     raise MultiPass::DecryptError
   end
 
-private
+  if Object.const_defined?(:ActiveSupport)
+    include ActiveSupport::Base64
+  else
+    require 'base64'
+  end
+
+  def encode_64(s)
+    b = Base64.encode64(s)
+    b.gsub! /\n/, ''
+    b
+  end
+
+  def decode_64(s)
+    Base64.decode64(s)
+  end
+
   if Object.const_defined?(:ActiveSupport)
     def decode_json(s)
       ActiveSupport::JSON.decode(s)
