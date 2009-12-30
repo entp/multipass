@@ -1,4 +1,5 @@
 require 'time'
+require 'ezcrypto'
 
 class MultiPass
   class Invalid < StandardError
@@ -35,9 +36,6 @@ class MultiPass
     @site_key   = site_key
     @api_key    = api_key
     @url_safe   = !options.key?(:url_safe) || options[:url_safe]
-    if !Object.const_defined?(:EzCrypto)
-      require 'ezcrypto'
-    end
     @crypto_key = EzCrypto::Key.with_password(@site_key, @api_key)
   end
 

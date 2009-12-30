@@ -1,7 +1,6 @@
 $LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
 require 'rubygems'
 require 'test/unit'
-require 'ezcrypto'
 require 'multipass'
 #require 'active_support'
 
