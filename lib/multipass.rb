@@ -29,13 +29,20 @@ class MultiPass
     new(site_key, api_key).decode(data)
   end
 
-  def initialize(site_key, api_key)
+  # options:
+  #   :url_safe => true
+  def initialize(site_key, api_key, options = {})
     @site_key   = site_key
     @api_key    = api_key
+    @url_safe   = !options.key?(:url_safe) || options[:url_safe]
     if !Object.const_defined?(:EzCrypto)
       require 'ezcrypto'
     end
     @crypto_key = EzCrypto::Key.with_password(@site_key, @api_key)
+  end
+
+  def url_safe?
+    !!@url_safe
   end
 
   # Encrypts the given hash into a multipass string.
@@ -45,13 +52,13 @@ class MultiPass
       when Time, DateTime, Date then options[:expires].to_s
       else options[:expires].to_s
     end
-    encode_64 @crypto_key.encrypt(options.to_json)
+    self.class.encode_64 @crypto_key.encrypt(options.to_json), @url_safe
   end
 
   # Decrypts the given multipass string and parses it as JSON.  Then, it checks
   # for a valid expiration date.
   def decode(data)
-    json = @crypto_key.decrypt(decode_64(data))
+    json = @crypto_key.decrypt(self.class.decode_64(data, @url_safe))
     
     if json.nil?
       raise MultiPass::DecryptError
@@ -82,13 +89,22 @@ class MultiPass
     require 'base64'
   end
 
-  def encode_64(s)
+  def self.encode_64(s, url_safe = true)
     b = Base64.encode64(s)
     b.gsub! /\n/, ''
+    if url_safe
+      b.tr! '+', '-'
+      b.tr! '/', '_'
+    end
     b
   end
 
-  def decode_64(s)
+  def self.decode_64(s, url_safe = true)
+    if url_safe
+      s = s.dup
+      s.tr! '-', '+'
+      s.tr! '_', '/'
+    end
     Base64.decode64(s)
   end
 

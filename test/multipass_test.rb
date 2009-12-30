@@ -5,23 +5,19 @@ require 'ezcrypto'
 require 'multipass'
 #require 'active_support'
 
-class MultiPassTest < Test::Unit::TestCase
-  def setup
-    @date   = Time.now + 1234
-    @input  = {:expires => @date, :email => 'ricky@bobby.com'}
-    @output = @input.merge(:expires => @input[:expires].to_s)
-    @key    = EzCrypto::Key.with_password('example', 'abc')
-    @mp     = MultiPass.new('example', 'abc')
-  end
-
+module MultiPassTests
   def test_encodes_multipass
-    expected = @key.encrypt64(@output.to_json).gsub(/\n/, '')
+    expected = MultiPass.encode_64(@key.encrypt(@output.to_json), @mp.url_safe?)
     assert_equal expected, @mp.encode(@input)
   end
 
   def test_encodes_multipass_with_class_method
-    expected = @key.encrypt64(@output.to_json).gsub(/\n/, '')
-    assert_equal expected, MultiPass.encode('example', 'abc', @input)
+    if @mp.url_safe?
+      expected = MultiPass.encode_64(@key.encrypt(@output.to_json), @mp.url_safe?)
+      assert_equal expected, MultiPass.encode('example', 'abc', @input)
+    else
+      # skip, there's no way to disable url safe base64 strings
+    end
   end
 
   def test_decodes_multipass
@@ -54,5 +50,29 @@ class MultiPassTest < Test::Unit::TestCase
     assert_raises MultiPass::ExpiredError do
       @mp.decode(encrypted)
     end
+  end
+end
+
+class StandardMultiPassTest < Test::Unit::TestCase
+  include MultiPassTests
+
+  def setup
+    @date   = Time.now + 1234
+    @input  = {:expires => @date, :email => 'ricky@bobby.com'}
+    @output = @input.merge(:expires => @input[:expires].to_s)
+    @key    = EzCrypto::Key.with_password('example', 'abc')
+    @mp     = MultiPass.new('example', 'abc', :url_safe => false)
+  end
+end
+
+class UrlSafeMultiPassTest < Test::Unit::TestCase
+  include MultiPassTests
+
+  def setup
+    @date   = Time.now + 1234
+    @input  = {:expires => @date, :email => 'ricky@bobby.com'}
+    @output = @input.merge(:expires => @input[:expires].to_s)
+    @key    = EzCrypto::Key.with_password('example', 'abc')
+    @mp     = MultiPass.new('example', 'abc', :url_safe => true)
   end
 end
