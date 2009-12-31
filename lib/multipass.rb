@@ -89,9 +89,11 @@ class MultiPass
     end
 
     options
-  rescue OpenSSL::CipherError
+  rescue CipherError
     raise MultiPass::DecryptError.new(data, json, options)
   end
+
+  CipherError = OpenSSL.const_defined?(:CipherError) ? OpenSSL::CipherError : OpenSSL::Cipher::CipherError
 
   if Object.const_defined?(:ActiveSupport)
     include ActiveSupport::Base64
