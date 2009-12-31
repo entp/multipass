@@ -75,3 +75,67 @@ class UrlSafeMultiPassTest < Test::Unit::TestCase
     @mp     = MultiPass.new('example', 'abc', :url_safe => true)
   end
 end
+
+class ErrorTest < Test::Unit::TestCase
+  def setup
+    @key = EzCrypto::Key.with_password('example', 'abc')
+    @mp  = MultiPass.new('example', 'abc')
+  end
+
+  def test_decrypt_error_stores_data
+    begin
+      @mp.decode 'abc'
+    rescue MultiPass::DecryptError => e
+      assert_equal 'abc', e.data
+    end
+  end
+
+  def test_json_error_stores_data
+    begin
+      data = @key.encrypt64("abc")
+      @mp.decode data
+    rescue MultiPass::JSONError => e
+      assert_equal data, e.data
+    end
+  end
+
+  def test_json_error_stores_json
+    begin
+      data = @key.encrypt64("{a")
+      @mp.decode data
+    rescue MultiPass::JSONError => e
+      assert_equal "{a", e.json
+    end
+  end
+
+  def test_expiration_error_stores_data
+    begin
+      json = {:expires => Time.now - 5, :email => 'ricky@bobby.com'}.to_json
+      data = @key.encrypt64(json)
+      @mp.decode data
+    rescue MultiPass::ExpiredError => e
+      assert_equal data, e.data
+    end
+  end
+
+  def test_expiration_error_stores_json
+    begin
+      json = {:expires => Time.now - 5, :email => 'ricky@bobby.com'}.to_json
+      data = @key.encrypt64(json)
+      @mp.decode data
+    rescue MultiPass::ExpiredError => e
+      assert_equal json, e.json
+    end
+  end
+
+  def test_expiration_error_stores_options
+    begin
+      opt  = {:expires => (Time.now - 5).to_s, :email => 'ricky@bobby.com'}
+      json = opt.to_json
+      data = @key.encrypt64(json)
+      @mp.decode data
+    rescue MultiPass::ExpiredError => e
+      assert_equal opt, e.options
+    end
+  end
+end

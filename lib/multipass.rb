@@ -3,7 +3,14 @@ require 'ezcrypto'
 
 class MultiPass
   class Invalid < StandardError
+    attr_reader :data, :json, :options
     @@message = "The MultiPass token is invalid."
+
+    def initialize(data = nil, json = nil, options = nil)
+      @data    = data
+      @json    = json
+      @options = options
+    end
 
     def message
       @@message
@@ -56,16 +63,17 @@ class MultiPass
   # Decrypts the given multipass string and parses it as JSON.  Then, it checks
   # for a valid expiration date.
   def decode(data)
+    json = options = nil
     json = @crypto_key.decrypt(self.class.decode_64(data, @url_safe))
     
     if json.nil?
-      raise MultiPass::DecryptError
+      raise MultiPass::DecryptError.new(data)
     end
 
-    options = decode_json(json)
+    options = decode_json(data, json)
     
     if !options.is_a?(Hash)
-      raise MultiPass::JSONError
+      raise MultiPass::JSONError.new(data, json, options)
     end
 
     options.keys.each do |key|
@@ -73,12 +81,12 @@ class MultiPass
     end
 
     if options[:expires].nil? || Time.now.utc > Time.parse(options[:expires])
-      raise MultiPass::ExpiredError
+      raise MultiPass::ExpiredError.new(data, json, options)
     end
 
     options
   rescue OpenSSL::CipherError
-    raise MultiPass::DecryptError
+    raise MultiPass::DecryptError.new(data, json, options)
   end
 
   if Object.const_defined?(:ActiveSupport)
@@ -107,17 +115,17 @@ class MultiPass
   end
 
   if Object.const_defined?(:ActiveSupport)
-    def decode_json(s)
+    def decode_json(data, s)
       ActiveSupport::JSON.decode(s)
     rescue ActiveSupport::JSON::ParseError
-      raise MultiPass::JSONError
+      raise MultiPass::JSONError.new(data, s)
     end
   else
     require 'json'
-    def decode_json(s)
+    def decode_json(data, s)
       JSON.parse(s)
     rescue JSON::ParserError
-      raise MultiPass::JSONError
+      raise MultiPass::JSONError.new(data, s)
     end
   end
 end
