@@ -3,8 +3,12 @@ require 'ezcrypto'
 
 class MultiPass
   class Invalid < StandardError
+    class << self
+      attr_accessor :message
+    end
+    self.message = "The MultiPass token is invalid."
+
     attr_reader :data, :json, :options
-    @@message = "The MultiPass token is invalid."
 
     def initialize(data = nil, json = nil, options = nil)
       @data    = data
@@ -13,20 +17,20 @@ class MultiPass
     end
 
     def message
-      @@message
+      self.class.message
     end
 
     alias to_s message
   end
 
   class ExpiredError < Invalid
-    @@message = "The MultiPass token has expired."
+    self.message = "The MultiPass token has expired."
   end
   class JSONError < Invalid
-    @@message = "The decrypted MultiPass token is not valid JSON."
+    self.message = "The decrypted MultiPass token is not valid JSON."
   end
   class DecryptError < Invalid
-    @@message = "The MultiPass token was not able to be decrypted."
+    self.message = "The MultiPass token was not able to be decrypted."
   end
 
   def self.encode(site_key, api_key, options = {})
