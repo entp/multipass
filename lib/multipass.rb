@@ -105,8 +105,9 @@ class MultiPass
     b = Base64.encode64(s)
     b.gsub! /\n/, ''
     if url_safe
-      b.tr! '+', '-'
-      b.tr! '/', '_'
+      b.tr!    '+', '-'
+      b.tr!    '/', '_'
+      b.chomp! '='
     end
     b
   end
@@ -116,6 +117,7 @@ class MultiPass
       s = s.dup
       s.tr! '-', '+'
       s.tr! '_', '/'
+      s << '='
     end
     Base64.decode64(s)
   end
