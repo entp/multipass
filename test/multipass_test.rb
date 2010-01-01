@@ -10,15 +10,6 @@ module MultiPassTests
     assert_equal expected, @mp.encode(@input)
   end
 
-  def test_encodes_multipass_with_class_method
-    if @mp.url_safe?
-      expected = MultiPass.encode_64(@key.encrypt(@output.to_json), @mp.url_safe?)
-      assert_equal expected, MultiPass.encode('example', 'abc', @input)
-    else
-      # skip, there's no way to disable url safe base64 strings
-    end
-  end
-
   def test_decodes_multipass
     encoded = @mp.encode(@input)
     assert_equal @input, @mp.decode(encoded)
@@ -66,6 +57,11 @@ end
 
 class UrlSafeMultiPassTest < Test::Unit::TestCase
   include MultiPassTests
+
+  def test_encodes_multipass_with_class_method
+    expected = MultiPass.encode_64(@key.encrypt(@output.to_json), @mp.url_safe?)
+    assert_equal expected, MultiPass.encode('example', 'abc', @input)
+  end
 
   def setup
     @date   = Time.now + 1234
