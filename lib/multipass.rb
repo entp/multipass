@@ -44,10 +44,8 @@ class MultiPass
   # options:
   #   :url_safe => true
   def initialize(site_key, api_key, options = {})
-    @site_key   = site_key
-    @api_key    = api_key
     @url_safe   = !options.key?(:url_safe) || options[:url_safe]
-    @crypto_key = EzCrypto::Key.with_password(@site_key, @api_key)
+    @crypto_key = EzCrypto::Key.with_password(site_key, api_key)
   end
 
   def url_safe?
