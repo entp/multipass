@@ -20,6 +20,13 @@ module MultiPassTests
     assert_equal @input, MultiPass.decode('example', 'abc', encoded)
   end
 
+  def test_decodes_unicode
+    @input[:name] = "Bj\\u00f8rn"
+    encoded = @mp.encode(@input)
+    decoded = @mp.decode(encoded)
+    assert_equal "Bjørn", decoded[:name]
+  end
+
   def test_invalidates_bad_string
     assert_raises MultiPass::DecryptError do
       @mp.decode("abc")

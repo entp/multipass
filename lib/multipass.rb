@@ -79,7 +79,7 @@ class MultiPass
     end
 
     options.keys.each do |key|
-      options[key.to_sym] = options.delete(key)
+      options[key.to_sym] = unencode_javascript_unicode_escape(options.delete(key))
     end
 
     if options[:expires].nil? || Time.now.utc > Time.parse(options[:expires])
@@ -97,6 +97,20 @@ class MultiPass
     include ActiveSupport::Base64
   else
     require 'base64'
+  end
+
+  # converts unicode (\u003c) to the actual character
+  # http://rishida.net/tools/conversion/
+  def unencode_javascript_unicode_escape(str)
+    str.gsub!(/\\u([0-9a-fA-F]{4})/) do |s| 
+      int = $1.to_i(16)
+      if int.zero? && s != "0000"
+        s
+      else
+        [int].pack("U")
+      end
+    end
+    str
   end
 
   def self.encode_64(s, url_safe = true)
