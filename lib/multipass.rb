@@ -84,11 +84,11 @@ class MultiPass
     
     # Force everything coming out of json into a Time object if it isn't already
     # with YAJL, it parses dates for us (ugh)
-    if options.has_key?(:expires) && options[:expires].is_a?(String)
+    if options.has_key?(:expires) && options[:expires].is_a?(String) && !options[:expires].empty?
       options[:expires] = Time.parse(options[:expires])
     end
 
-    if options[:expires].nil? || Time.now.utc > options[:expires]
+    if options[:expires].nil? || (options[:expires] != '' && Time.now.utc > options[:expires])
       raise MultiPass::ExpiredError.new(data, json, options)
     end
 
