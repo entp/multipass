@@ -67,13 +67,13 @@ class MultiPass
   def decode(data)
     json = options = nil
     json = @crypto_key.decrypt(self.class.decode_64(data, @url_safe))
-    
+
     if json.nil?
       raise MultiPass::DecryptError.new(data)
     end
 
     options = decode_json(data, json)
-    
+
     if !options.is_a?(Hash)
       raise MultiPass::JSONError.new(data, json, options)
     end
@@ -81,7 +81,7 @@ class MultiPass
     options.keys.each do |key|
       options[key.to_sym] = unencode_javascript_unicode_escape(options.delete(key))
     end
-    
+
     # Force everything coming out of json into a Time object if it isn't already
     # with YAJL, it parses dates for us (ugh)
     if options.has_key?(:expires) && options[:expires].is_a?(String) && !options[:expires].empty?

@@ -1,10 +1,21 @@
+# encoding: UTF-8
+
 $LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
 require 'rubygems'
 require 'test/unit'
 require 'multipass'
 #require 'active_support'
 
+module MultiPassTestHelper
+  def assert_multipass(expected, actual)
+    assert_equal expected[:email], actual[:email]
+    assert_equal expected[:expires].to_s, actual[:expires].to_s
+  end
+end
+
 module MultiPassTests
+  include MultiPassTestHelper
+
   def test_encodes_multipass
     expected = MultiPass.encode_64(@key.encrypt(@output.to_json), @mp.url_safe?)
     assert_equal expected, @mp.encode(@input)
@@ -12,12 +23,12 @@ module MultiPassTests
 
   def test_decodes_multipass
     encoded = @mp.encode(@input)
-    assert_equal @input, @mp.decode(encoded)
+    assert_multipass @input, @mp.decode(encoded)
   end
 
   def test_decodes_multipass_with_class_method
     encoded = @mp.encode(@input)
-    assert_equal @input, MultiPass.decode('example', 'abc', encoded)
+    assert_multipass @input, MultiPass.decode('example', 'abc', encoded)
   end
 
   def test_decodes_unicode
@@ -80,6 +91,8 @@ class UrlSafeMultiPassTest < Test::Unit::TestCase
 end
 
 class ErrorTest < Test::Unit::TestCase
+  include MultiPassTestHelper
+
   def setup
     @key = EzCrypto::Key.with_password('example', 'abc')
     @mp  = MultiPass.new('example', 'abc')
@@ -133,12 +146,12 @@ class ErrorTest < Test::Unit::TestCase
 
   def test_expiration_error_stores_options
     begin
-      opt  = {:expires => (Time.now - 5).to_s, :email => 'ricky@bobby.com'}
+      opt  = {:expires => Time.now - 5, :email => 'ricky@bobby.com'}
       json = opt.to_json
       data = @key.encrypt64(json)
       @mp.decode data
     rescue MultiPass::ExpiredError => e
-      assert_equal opt, e.options
+      assert_multipass opt, e.options
     end
   end
 end
