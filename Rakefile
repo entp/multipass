@@ -8,14 +8,14 @@ begin
     gem.name = "multipass"
     gem.summary = 'Bare bones implementation of encoding and decoding MultiPass values for SSO.'
     gem.email = "technoweenie@gmail.com"
-    gem.homepage = "http://github.com/entp/multipass"
+    gem.homepage = "https://github.com/entp/multipass"
     gem.authors = ["rick"]
     gem.add_dependency 'ezcrypto'
 
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
 rescue LoadError
-  puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
+  puts "Jeweler not available. Install it with: gem install jeweler"
 end
 
 require 'rake/testtask'
