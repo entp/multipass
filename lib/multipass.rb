@@ -145,7 +145,7 @@ class MultiPass
   if Object.const_defined?(:ActiveSupport)
     def decode_json(data, s)
       ActiveSupport::JSON.decode(s)
-    rescue ActiveSupport::JSON::ParseError
+    rescue ActiveSupport::JSON.parse_error
       raise MultiPass::JSONError.new(data, s)
     end
   else
