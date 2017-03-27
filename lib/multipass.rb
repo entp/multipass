@@ -1,5 +1,6 @@
 require 'time'
 require 'ezcrypto'
+require 'base64'
 
 class MultiPass
   class Invalid < StandardError
