@@ -56,7 +56,7 @@ class MultiPass
   # Encrypts the given hash into a multipass string.
   def encode(options = {})
     options[:expires] = case options[:expires]
-      when Fixnum               then Time.at(options[:expires]).to_s
+      when Integer              then Time.at(options[:expires]).to_s
       when Time, DateTime, Date then options[:expires].to_s
       else options[:expires].to_s
     end
